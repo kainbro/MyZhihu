@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Author: kylin_gu
  * Created by: ModelGenerator on 2016/3/12
  */
-public class TopStoriesItem implements Serializable{
+public class TopStoriesItem extends AbstractStoriesItem implements Serializable{
     public String image;
     public int type;
     public long id;

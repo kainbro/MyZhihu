@@ -1,5 +1,7 @@
 package com.kylin.myzhihu.ui;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -8,32 +10,31 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import com.kylin.myzhihu.R;
-import com.kylin.myzhihu.entity.StoriesItem;
+import com.kylin.myzhihu.entity.AbstractStoriesItem;
 import com.kylin.myzhihu.presenters.MainActivityPresenter;
 import com.kylin.myzhihu.utils.StoriesAdapter;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainActivityPresenter.IMainActivityUi,
-        View.OnClickListener{
+        View.OnClickListener, StoriesAdapter.CustomItemClickListener{
 
     private MainActivityPresenter mPresenter;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    ProgressDialog pDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +66,14 @@ public class MainActivity extends AppCompatActivity
 
         // specify an adapter (see also next example)
         ArrayList myDataset = new ArrayList();
-        mAdapter = new StoriesAdapter(myDataset);
+        mAdapter = new StoriesAdapter(myDataset, this);
         mRecyclerView.setAdapter(mAdapter);
+
+        pDialog = new ProgressDialog(this);
+        pDialog.setMessage(getResources().getString(R.string.progress_loading));
 
         mPresenter = new MainActivityPresenter();
         mPresenter.onUiReady(this);
-
     }
 
     @Override
@@ -96,6 +99,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (pDialog.isShowing()){
+            pDialog.hide();
+            pDialog = null;
+        }
         mPresenter.onUiUnready();
     }
 
@@ -157,42 +164,63 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void updateTopStories(List topStories) {
+    public void updateTopStories(List<? extends AbstractStoriesItem> topStories) {
 
     }
 
     @Override
-    public void updateStories(List stories) {
+    public void updateStories(List<? extends AbstractStoriesItem> stories) {
         if (mAdapter instanceof StoriesAdapter){
-            ArrayList mDataSet = ((StoriesAdapter) mAdapter).getDataSet();
-            for (int i=0; i<stories.size();i++){
-                mDataSet.add(((StoriesItem) stories.get(i)).getTitle());
-            }
+            List mDataSet = ((StoriesAdapter) mAdapter).getDataSet();
+            mDataSet.addAll(0,stories);
             mAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void showProgressDialog(boolean shown) {
+        if (pDialog!=null){
+            if (shown&&!pDialog.isShowing()){
+                pDialog.show();
+            }else if(!shown&&pDialog.isShowing()){
+                pDialog.hide();
+            }
+        }
+    }
+
+    @Override
+    public Context getContext() {
+        return this;
     }
 
     @Override
     public void onClick(View v) {
 
         switch(v.getId()){
+
             case R.id.fab:
                 final Snackbar snackbar = Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG);
                 snackbar.setAction("UNDO", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        snackbar.dismiss();
+                        // manully dismiss, would not refresh view leading to FAB suspend there.
+                        // but automatically dismiss will refresh redraw.
+                        //snackbar.dismiss();
                     }
                 });
                 snackbar.show();
-
-                mPresenter.requestLatestStories();
-
                 break;
             default:
+
                 break;
         }
 
     }
 
+    @Override
+    public void onItemClick(View v, int postion) {
+        if (v instanceof CardView){
+            mPresenter.startDetailActivity(String.valueOf(v.getTag()));
+        }
+    }
 }

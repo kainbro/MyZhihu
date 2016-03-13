@@ -1,14 +1,13 @@
 package com.kylin.myzhihu.entity;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * Author: kylin_gu
  * Created by: ModelGenerator on 2016/3/12
  */
-public class StoriesItem implements Serializable{
+public class StoriesItem extends AbstractStoriesItem implements Serializable{
 
     public List<String> images;
     public int type;
