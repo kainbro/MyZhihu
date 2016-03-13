@@ -61,9 +61,8 @@ public class DetailStoryActivityPresenter {
                             getUi().showStory(jObject.get("share_url").toString());
                             getUi().updateTitleImage(jObject.get("image").toString(),
                                     AppController.getInstance().getImageLoader());
+                            getUi().updateTitle(jObject.get("title").toString());
                             //jObject.get("body").toString()
-                            Log.d(TAG, jObject.get("title").toString());
-                            Log.d(TAG, jObject.get("image").toString());
                         }
                     }
                 },
@@ -82,6 +81,7 @@ public class DetailStoryActivityPresenter {
         void updateTitleImage(String url, ImageLoader imageLoader);
         void showStory(String content);
         void showProgressDialog(boolean shown);
+        void updateTitle(String title);
         Context getContext();
     }
 }

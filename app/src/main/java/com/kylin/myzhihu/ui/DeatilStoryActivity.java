@@ -8,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.webkit.WebView;
@@ -26,15 +27,17 @@ public class DeatilStoryActivity extends AppCompatActivity implements DetailStor
 
     private DetailStoryActivityPresenter mPresenter;
     private WebView wvStory;
-    ProgressDialog pDialog = null;
-    NetworkImageView nivTitleImage = null;
+    private ProgressDialog pDialog = null;
+    private NetworkImageView nivTitleImage = null;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deatil_story);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -80,6 +83,18 @@ public class DeatilStoryActivity extends AppCompatActivity implements DetailStor
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                this.finish();
+                return true;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void updateTitleImage(String url, ImageLoader imageLoader) {
         nivTitleImage.setImageUrl(url, imageLoader);
     }
@@ -99,6 +114,11 @@ public class DeatilStoryActivity extends AppCompatActivity implements DetailStor
                 pDialog.hide();
             }
         }
+    }
+
+    @Override
+    public void updateTitle(String title) {
+        setTitle(title);
     }
 
     @Override
